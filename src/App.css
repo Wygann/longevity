@@ -1,0 +1,19 @@
+/* App-specific styles */
+/* Most styling should be done with Tailwind CSS utilities */
+/* Use this file only for styles that cannot be achieved with Tailwind */
+
+/* Example: Custom animations that aren't in Tailwind */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
