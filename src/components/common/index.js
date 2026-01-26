@@ -6,3 +6,4 @@
 
 export { default as Button } from './Button'
 export { default as FileUpload } from './FileUpload'
+export { default as ErrorBoundary } from './ErrorBoundary'

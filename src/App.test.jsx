@@ -69,7 +69,7 @@ describe('App', () => {
 
     await user.upload(input, file)
 
-    expect(analyzeBloodTest).toHaveBeenCalledWith(file)
+    expect(analyzeBloodTest).toHaveBeenCalledWith(expect.arrayContaining([file]), null)
   })
 
   /**
@@ -97,7 +97,9 @@ describe('App', () => {
 
     await user.upload(input, file)
 
-    expect(screen.getByText(/Analyzing your blood test results/i)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText(/Analyzing your blood test results/i)).toBeInTheDocument()
+    })
   })
 
   /**
@@ -155,7 +157,8 @@ describe('App', () => {
     await user.upload(input, file)
 
     await waitFor(() => {
-      expect(screen.getByText(/Analysis Failed/i)).toBeInTheDocument()
+      const errorElements = screen.getAllByText(/Analysis Failed/i)
+      expect(errorElements.length).toBeGreaterThan(0)
       expect(screen.getByText(/Try Again/i)).toBeInTheDocument()
     })
   })

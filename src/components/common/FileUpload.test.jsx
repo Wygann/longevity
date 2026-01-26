@@ -21,7 +21,7 @@ describe('FileUpload', () => {
     const input = screen.getByLabelText('File input')
     fireEvent.change(input, { target: { files: [file] } })
 
-    expect(handleFileSelect).toHaveBeenCalledWith(file)
+    expect(handleFileSelect).toHaveBeenCalledWith(file, expect.arrayContaining([file]))
   })
 
   it('shows error for file too large', () => {

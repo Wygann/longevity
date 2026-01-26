@@ -124,6 +124,57 @@ function generateMockBiomarkers(variation = 0) {
   const variationFactor = 1 + variation * 0.05 // Small variation (5% per file)
   
   return [
+    // CBC (Morfologia) - Common Polish markers
+    {
+      name: 'RBC (Erythrocytes)',
+      value: Math.round(4.5 * variationFactor * 1000000),
+      unit: '/µl',
+      optimalRange: { min: 4200000, max: 5700000 },
+      status: 'optimal',
+      description: 'Red blood cell count within normal range',
+    },
+    {
+      name: 'Hemoglobin (Hb)',
+      value: Math.round(15 * variationFactor),
+      unit: 'g/dL',
+      optimalRange: { min: 14, max: 18 },
+      status: 'optimal',
+      description: 'Hemoglobin levels normal',
+    },
+    {
+      name: 'Hematocrit (HCT)',
+      value: Math.round(45 * variationFactor),
+      unit: '%',
+      optimalRange: { min: 40, max: 54 },
+      status: 'optimal',
+      description: 'Hematocrit within normal range',
+    },
+    {
+      name: 'WBC (White Blood Cells)',
+      value: Math.round(7 * variationFactor * 1000),
+      unit: '/µl',
+      optimalRange: { min: 4000, max: 10000 },
+      status: 'optimal',
+      description: 'White blood cell count normal',
+    },
+    {
+      name: 'Platelets (PLT)',
+      value: Math.round(250 * variationFactor * 1000),
+      unit: '/µl',
+      optimalRange: { min: 150000, max: 400000 },
+      status: 'optimal',
+      description: 'Platelet count within normal range',
+    },
+    {
+      name: 'MCV',
+      value: Math.round(88 * variationFactor),
+      unit: 'fL',
+      optimalRange: { min: 82, max: 96 },
+      status: 'optimal',
+      description: 'Mean corpuscular volume normal',
+    },
+    
+    // Lipid Profile
     {
       name: 'Total Cholesterol',
       value: Math.round(220 * variationFactor),
@@ -156,6 +207,16 @@ function generateMockBiomarkers(variation = 0) {
       status: 'optimal',
       description: 'Triglycerides within normal range',
     },
+    
+    // Metabolic
+    {
+      name: 'Glucose',
+      value: Math.round(95 * variationFactor),
+      unit: 'mg/dL',
+      optimalRange: { min: 70, max: 100 },
+      status: 'optimal',
+      description: 'Blood glucose within normal range',
+    },
     {
       name: 'HbA1c',
       value: 5.4,
@@ -164,6 +225,120 @@ function generateMockBiomarkers(variation = 0) {
       status: 'optimal',
       description: 'Excellent blood sugar control',
     },
+    
+    // Inflammation
+    {
+      name: 'C-Reactive Protein (CRP)',
+      value: 2.1,
+      unit: 'mg/L',
+      optimalRange: { min: 0, max: 1.0 },
+      status: 'concerning',
+      description: 'Elevated inflammation markers',
+    },
+    {
+      name: 'ESR',
+      value: Math.round(15 * variationFactor),
+      unit: 'mm/h',
+      optimalRange: { min: 0, max: 20 },
+      status: 'optimal',
+      description: 'Erythrocyte sedimentation rate normal',
+    },
+    
+    // Liver Function
+    {
+      name: 'ALT',
+      value: Math.round(25 * variationFactor),
+      unit: 'U/L',
+      optimalRange: { min: 0, max: 40 },
+      status: 'optimal',
+      description: 'ALT levels normal',
+    },
+    {
+      name: 'AST',
+      value: Math.round(28 * variationFactor),
+      unit: 'U/L',
+      optimalRange: { min: 0, max: 40 },
+      status: 'optimal',
+      description: 'AST levels normal',
+    },
+    {
+      name: 'ALP',
+      value: Math.round(85 * variationFactor),
+      unit: 'U/L',
+      optimalRange: { min: 44, max: 147 },
+      status: 'optimal',
+      description: 'Alkaline phosphatase normal',
+    },
+    {
+      name: 'Bilirubin',
+      value: Math.round(0.8 * variationFactor * 10) / 10,
+      unit: 'mg/dL',
+      optimalRange: { min: 0.1, max: 1.2 },
+      status: 'optimal',
+      description: 'Bilirubin levels normal',
+    },
+    {
+      name: 'GGT',
+      value: Math.round(30 * variationFactor),
+      unit: 'U/L',
+      optimalRange: { min: 0, max: 60 },
+      status: 'optimal',
+      description: 'GGT levels normal',
+    },
+    
+    // Kidney Function
+    {
+      name: 'Creatinine',
+      value: Math.round(0.9 * variationFactor * 10) / 10,
+      unit: 'mg/dL',
+      optimalRange: { min: 0.6, max: 1.2 },
+      status: 'optimal',
+      description: 'Creatinine levels normal',
+    },
+    {
+      name: 'BUN',
+      value: Math.round(15 * variationFactor),
+      unit: 'mg/dL',
+      optimalRange: { min: 7, max: 20 },
+      status: 'optimal',
+      description: 'Blood urea nitrogen normal',
+    },
+    {
+      name: 'eGFR',
+      value: Math.round(90 * variationFactor),
+      unit: 'mL/min/1.73m²',
+      optimalRange: { min: 90, max: 120 },
+      status: 'optimal',
+      description: 'Estimated glomerular filtration rate normal',
+    },
+    
+    // Thyroid
+    {
+      name: 'TSH',
+      value: Math.round(2.0 * variationFactor * 10) / 10,
+      unit: 'mIU/L',
+      optimalRange: { min: 0.4, max: 4.0 },
+      status: 'optimal',
+      description: 'Thyroid-stimulating hormone normal',
+    },
+    {
+      name: 'Free T4',
+      value: Math.round(1.2 * variationFactor * 10) / 10,
+      unit: 'ng/dL',
+      optimalRange: { min: 0.8, max: 1.8 },
+      status: 'optimal',
+      description: 'Free T4 levels normal',
+    },
+    {
+      name: 'Free T3',
+      value: Math.round(3.2 * variationFactor * 10) / 10,
+      unit: 'pg/mL',
+      optimalRange: { min: 2.3, max: 4.2 },
+      status: 'optimal',
+      description: 'Free T3 levels normal',
+    },
+    
+    // Vitamins/Minerals
     {
       name: 'Vitamin D',
       value: 28,
@@ -173,13 +348,31 @@ function generateMockBiomarkers(variation = 0) {
       description: 'Vitamin D levels below optimal',
     },
     {
-      name: 'C-Reactive Protein (CRP)',
-      value: 2.1,
-      unit: 'mg/L',
-      optimalRange: { min: 0, max: 1.0 },
-      status: 'concerning',
-      description: 'Elevated inflammation markers',
+      name: 'Calcium',
+      value: Math.round(9.5 * variationFactor * 10) / 10,
+      unit: 'mg/dL',
+      optimalRange: { min: 8.5, max: 10.5 },
+      status: 'optimal',
+      description: 'Calcium levels normal',
     },
+    {
+      name: 'Phosphorus',
+      value: Math.round(3.5 * variationFactor * 10) / 10,
+      unit: 'mg/dL',
+      optimalRange: { min: 2.5, max: 4.5 },
+      status: 'optimal',
+      description: 'Phosphorus levels normal',
+    },
+    {
+      name: 'Magnesium',
+      value: Math.round(2.0 * variationFactor * 10) / 10,
+      unit: 'mg/dL',
+      optimalRange: { min: 1.7, max: 2.2 },
+      status: 'optimal',
+      description: 'Magnesium levels normal',
+    },
+    
+    // Hormones
     {
       name: 'Testosterone',
       value: 450,
@@ -202,23 +395,120 @@ function generateHealthSummary(biomarkers) {
   const suboptimal = biomarkers.filter((b) => b.status === 'suboptimal')
   const concerning = biomarkers.filter((b) => b.status === 'concerning')
 
-  // Select top 3 positive aspects
-  const positives = [
-    'Excellent blood sugar control (HbA1c: 5.4%) - reducing diabetes risk',
-    'Good HDL cholesterol levels - supporting cardiovascular health',
-    'Healthy testosterone levels - maintaining energy and vitality',
-  ]
+  // Select top 3 positive aspects from optimal biomarkers
+  // Prioritize biomarkers with high health impact
+  const positiveBiomarkers = optimal
+    .filter((b) => {
+      // Prioritize important markers
+      const importantMarkers = [
+        'HbA1c',
+        'HDL',
+        'Testosterone',
+        'Hemoglobin',
+        'eGFR',
+        'TSH',
+      ]
+      return importantMarkers.some((marker) =>
+        b.name.toLowerCase().includes(marker.toLowerCase())
+      )
+    })
+    .slice(0, 3)
 
-  // Select top 3 priorities
-  const priorities = [
-    'Elevated inflammation (CRP: 2.1) - focus on anti-inflammatory diet and stress management',
-    'Vitamin D deficiency (28 ng/mL) - consider supplementation to reach optimal levels (30-100 ng/mL)',
-    'LDL cholesterol above optimal (140 mg/dL) - implement dietary changes and regular exercise',
-  ]
+  const positives = positiveBiomarkers.map((marker) => {
+    if (marker.name.includes('HbA1c')) {
+      return `Excellent blood sugar control (HbA1c: ${marker.value}${marker.unit}) - reducing diabetes risk`
+    }
+    if (marker.name.includes('HDL')) {
+      return `Good HDL cholesterol levels (${marker.value} ${marker.unit}) - supporting cardiovascular health`
+    }
+    if (marker.name.includes('Testosterone')) {
+      return `Healthy testosterone levels (${marker.value} ${marker.unit}) - maintaining energy and vitality`
+    }
+    if (marker.name.includes('Hemoglobin')) {
+      return `Healthy hemoglobin levels (${marker.value} ${marker.unit}) - good oxygen transport`
+    }
+    if (marker.name.includes('eGFR')) {
+      return `Good kidney function (eGFR: ${marker.value} ${marker.unit}) - supporting overall health`
+    }
+    if (marker.name.includes('TSH')) {
+      return `Normal thyroid function (TSH: ${marker.value} ${marker.unit}) - supporting metabolism`
+    }
+    return `${marker.name} within optimal range - ${marker.description}`
+  })
 
+  // Fill remaining slots if needed
+  while (positives.length < 3 && optimal.length > positives.length) {
+    const remaining = optimal.filter(
+      (b) => !positiveBiomarkers.includes(b)
+    )
+    if (remaining.length > 0) {
+      const marker = remaining[0]
+      positives.push(
+        `${marker.name} within optimal range - ${marker.description}`
+      )
+    } else {
+      break
+    }
+  }
+
+  // Select top 3 priorities from suboptimal and concerning biomarkers
+  // Prioritize concerning > suboptimal, and by health impact
+  const priorityBiomarkers = [...concerning, ...suboptimal]
+    .filter((b) => {
+      // Prioritize high-impact markers
+      const highImpactMarkers = [
+        'CRP',
+        'C-Reactive Protein',
+        'Vitamin D',
+        'LDL',
+        'Total Cholesterol',
+        'Glucose',
+        'Creatinine',
+      ]
+      return highImpactMarkers.some((marker) =>
+        b.name.toLowerCase().includes(marker.toLowerCase())
+      )
+    })
+    .slice(0, 3)
+
+  const priorities = priorityBiomarkers.map((marker, index) => {
+    if (marker.name.includes('CRP') || marker.name.includes('C-Reactive Protein')) {
+      return `Elevated inflammation (CRP: ${marker.value} ${marker.unit}) - focus on anti-inflammatory diet and stress management`
+    }
+    if (marker.name.includes('Vitamin D')) {
+      return `Vitamin D deficiency (${marker.value} ${marker.unit}) - consider supplementation to reach optimal levels (${marker.optimalRange.min}-${marker.optimalRange.max} ${marker.unit})`
+    }
+    if (marker.name.includes('LDL')) {
+      return `LDL cholesterol above optimal (${marker.value} ${marker.unit}) - implement dietary changes and regular exercise`
+    }
+    if (marker.name.includes('Total Cholesterol')) {
+      return `Total cholesterol elevated (${marker.value} ${marker.unit}) - focus on heart-healthy diet and lifestyle`
+    }
+    if (marker.name.includes('Glucose')) {
+      return `Blood glucose needs attention (${marker.value} ${marker.unit}) - consider dietary modifications and regular monitoring`
+    }
+    return `${marker.name} needs attention (${marker.value} ${marker.unit}) - ${marker.description}`
+  })
+
+  // Fill remaining slots if needed
+  while (priorities.length < 3 && priorityBiomarkers.length < biomarkers.length) {
+    const remaining = [...concerning, ...suboptimal].filter(
+      (b) => !priorityBiomarkers.includes(b)
+    )
+    if (remaining.length > 0) {
+      const marker = remaining[0]
+      priorities.push(
+        `${marker.name} needs attention (${marker.value} ${marker.unit}) - ${marker.description}`
+      )
+    } else {
+      break
+    }
+  }
+
+  // Ensure exactly 3 of each
   return {
-    positives,
-    priorities,
+    positives: positives.slice(0, 3),
+    priorities: priorities.slice(0, 3),
   }
 }
 
