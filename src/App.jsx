@@ -327,7 +327,7 @@ function App() {
         {/* Footer */}
         <footer className="mt-12 text-center text-sm text-gray-600 space-y-2">
           <p>
-            Longevity AI MVP - Powered by AI analysis of your blood test results
+            Longevity AI MVP ver. 0.2 - Powered by AI analysis of your blood test results
           </p>
           <p>
             Need help?{' '}
