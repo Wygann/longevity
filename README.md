@@ -14,6 +14,9 @@ A digital AI platform for people who want to take care of their health to live l
 
 - **Modular Architecture**: Clean separation of concerns with organized folder structure
 - **Mobile-First Design**: Responsive UI built with Tailwind CSS
+- **AI-Powered Analysis**: Google Gemini API integration for biomarker extraction and analysis (Phase 2)
+- **Document Anonymization**: Automatic removal of personal identifiers before AI processing
+- **Graceful Fallback**: Automatic fallback to mock service if AI unavailable
 - **Comprehensive Testing**: Vitest and React Testing Library for strict testing standards
 - **Code Quality**: ESLint and Prettier for consistent code style
 - **Performance Optimized**: Built with Vite for fast development and optimized production builds
@@ -43,6 +46,19 @@ npm install
 cp env.example .env
 # Edit .env with your configuration
 ```
+
+**For AI Integration (Phase 2)**:
+```bash
+# Add your Google Gemini API key to .env
+VITE_GEMINI_API_KEY=your-gemini-api-key-here
+VITE_USE_AI_SERVICE=true
+```
+
+Get your API key from: https://aistudio.google.com/app/apikey
+
+**Free Tier**: 1,500 requests/day, 15 requests/minute - perfect for testing!
+
+**Note**: Without AI configuration, the app will use mock service (Phase 1).
 
 4. Start the development server:
 ```bash
@@ -107,6 +123,9 @@ npm run preview
 ## 📚 Documentation
 
 - [MVP Specification](./docs/MVP_SPECIFICATION.md) - Complete MVP feature specification
+- [Development Plan](./docs/PLAN.md) - Phased development plan
+- [Phase 1 Implementation](./docs/PHASE1_IMPLEMENTATION_SUMMARY.md) - Phase 1 completion summary
+- [Phase 2 Implementation](./docs/PHASE2_IMPLEMENTATION.md) - AI integration guide
 - [Architecture Guide](./docs/ARCHITECTURE.md) - Detailed architecture documentation
 - [Contributing Guidelines](./docs/CONTRIBUTING.md) - How to contribute to the project
 - [Component Guidelines](./src/components/README.md) - Component development guidelines

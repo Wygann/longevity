@@ -6,10 +6,60 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { analyzeBloodTest, validateFile } from './analysisService'
+import { isAIAvailable } from './aiService'
+import { getEnvBoolean } from '../utils/env'
+
+// Mock AI service
+vi.mock('./aiService', () => ({
+  isAIAvailable: vi.fn(() => false),
+  extractBiomarkers: vi.fn(),
+  generateHealthSummary: vi.fn(),
+  calculateBiologicalAge: vi.fn(),
+  generateRecommendations: vi.fn(),
+}))
+
+// Mock anonymization service
+const mockAnonymizeDocument = vi.fn((content) => ({
+  anonymizedContent: content,
+  medicalData: { demographics: {}, testDate: null },
+  metadata: {},
+}))
+const mockExtractTextFromPDF = vi.fn(() => Promise.resolve(''))
+const mockExtractTextFromImage = vi.fn(() => Promise.resolve(''))
+
+vi.mock('./anonymizationService', () => ({
+  anonymizeDocument: (...args) => mockAnonymizeDocument(...args),
+  extractTextFromPDF: (...args) => mockExtractTextFromPDF(...args),
+  extractTextFromImage: (...args) => mockExtractTextFromImage(...args),
+}))
+
+// Mock env utils
+vi.mock('../utils/env', () => ({
+  getEnvBoolean: vi.fn(() => false),
+}))
+import { isAIAvailable } from './aiService'
+import { getEnvBoolean } from '../utils/env'
+
+// Mock AI service
+vi.mock('./aiService', () => ({
+  isAIAvailable: vi.fn(() => false),
+  extractBiomarkers: vi.fn(),
+  generateHealthSummary: vi.fn(),
+  calculateBiologicalAge: vi.fn(),
+  generateRecommendations: vi.fn(),
+}))
+
+// Mock env utils
+vi.mock('../utils/env', () => ({
+  getEnvBoolean: vi.fn(() => false),
+}))
 
 describe('analysisService', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    // Default: use mock service
+    getEnvBoolean.mockReturnValue(false)
+    isAIAvailable.mockReturnValue(false)
   })
 
   afterEach(() => {
@@ -228,14 +278,15 @@ describe('analysisService', () => {
      * Test: Rejects file too large
      */
     it('rejects file too large (>10MB)', () => {
-      const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.pdf', {
+      // Use smaller size for faster test execution (just over 10MB: 10MB + 1 byte)
+      const largeFile = new File(['x'.repeat(10 * 1024 * 1024 + 1)], 'large.pdf', {
         type: 'application/pdf',
       })
       const result = validateFile(largeFile)
 
       expect(result.isValid).toBe(false)
       expect(result.error).toContain('10MB')
-    })
+    }, 10000) // Increase timeout to 10 seconds for file creation
 
     /**
      * Test: Rejects invalid file type
@@ -268,6 +319,55 @@ describe('analysisService', () => {
       const result = validateFile(file)
 
       expect(result.isValid).toBe(true)
+    })
+  })
+
+  describe('AI Integration', () => {
+    /**
+     * Test: Uses mock service when AI not available
+     */
+    it('uses mock service when AI not available', async () => {
+      getEnvBoolean.mockReturnValue(false)
+      isAIAvailable.mockReturnValue(false)
+
+      const file = new File(['test'], 'test.pdf', { type: 'application/pdf' })
+      const promise = analyzeBloodTest(file)
+
+      await vi.runAllTimersAsync()
+      const results = await promise
+
+      expect(results.analysisMethod).toBe('mock')
+      expect(results.biomarkers).toBeDefined()
+    })
+
+    /**
+     * Test: Uses mock service when USE_AI_SERVICE is false
+     */
+    it('uses mock service when USE_AI_SERVICE is false', async () => {
+      getEnvBoolean.mockReturnValue(false) // USE_AI_SERVICE = false
+      isAIAvailable.mockReturnValue(true) // But AI available
+
+      const file = new File(['test'], 'test.pdf', { type: 'application/pdf' })
+      const promise = analyzeBloodTest(file)
+
+      await vi.runAllTimersAsync()
+      const results = await promise
+
+      expect(results.analysisMethod).toBe('mock')
+    })
+
+    /**
+     * Test: Includes analysisMethod in results
+     */
+    it('includes analysisMethod in results', async () => {
+      const file = new File(['test'], 'test.pdf', { type: 'application/pdf' })
+      const promise = analyzeBloodTest(file)
+
+      await vi.runAllTimersAsync()
+      const results = await promise
+
+      expect(results).toHaveProperty('analysisMethod')
+      expect(['mock', 'AI']).toContain(results.analysisMethod)
     })
   })
 })

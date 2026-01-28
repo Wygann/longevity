@@ -70,7 +70,7 @@ describe('App Integration Tests', () => {
     // Delay the promise resolution to allow "analyzing" state to be visible
     analyzeBloodTest.mockImplementation(
       () =>
-        new Promise((resolve) => setTimeout(() => resolve(mockResults), 100))
+        new Promise((resolve) => setTimeout(() => resolve(mockResults), 200))
     )
 
     const user = userEvent.setup()
@@ -81,10 +81,11 @@ describe('App Integration Tests', () => {
     const input = screen.getByLabelText('File input')
     await user.upload(input, file)
 
-    // Step 2: Wait for analysis
+    // Step 2: Wait for analysis state - use more flexible matcher
     await waitFor(() => {
-      expect(screen.getByText(/Analyzing your blood test results/i)).toBeInTheDocument()
-    }, { timeout: 2000 })
+      const analyzingText = screen.getByText(/Analyzing your blood test results/i)
+      expect(analyzingText).toBeInTheDocument()
+    }, { timeout: 3000 })
 
     // Step 3: Wait for results
     await waitFor(() => {

@@ -13,7 +13,14 @@ export default defineConfig({
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@services': path.resolve(__dirname, './src/services'),
       '@assets': path.resolve(__dirname, './public/assets'),
+      // Alias for pdfjs-dist to use browser build
+      'pdfjs-dist': path.resolve(__dirname, './node_modules/pdfjs-dist/build/pdf.js'),
     },
+  },
+  // Optimize dependencies - exclude pdfjs-dist from pre-bundling
+  // pdfjs-dist uses workers and needs to be loaded dynamically
+  optimizeDeps: {
+    exclude: ['pdfjs-dist'],
   },
   // Performance optimizations
   build: {

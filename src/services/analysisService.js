@@ -1,25 +1,181 @@
 /**
  * Analysis Service
  * 
- * Mock AI analysis service for processing blood test results.
- * In production, this would connect to an actual AI backend.
+ * Main analysis service for processing blood test results.
+ * Supports both AI-powered analysis (Phase 2+) and mock fallback (Phase 1).
  * 
- * This service simulates:
+ * This service handles:
+ * - Document anonymization
  * - PDF/image parsing
- * - Biomarker extraction
- * - Health analysis
- * - Biological age calculation
- * - Recommendation generation
+ * - Biomarker extraction (AI or mock)
+ * - Health analysis (AI or mock)
+ * - Biological age calculation (AI or mock)
+ * - Recommendation generation (AI or mock)
  */
 
+import { anonymizeDocument, extractTextFromPDF, extractTextFromImage } from './anonymizationService'
+import { 
+  isAIAvailable, 
+  extractBiomarkers as aiExtractBiomarkers,
+  generateHealthSummary as aiGenerateHealthSummary,
+  calculateBiologicalAge as aiCalculateBiologicalAge,
+  generateRecommendations as aiGenerateRecommendations
+} from './aiService'
+import { getEnvBoolean } from '../utils/env'
+
 /**
- * Simulates analysis of uploaded blood test file(s)
+ * Analyzes uploaded blood test file(s)
+ * Uses AI if available, otherwise falls back to mock service
  * 
  * @param {File|File[]} files - The uploaded file(s) (PDF or image)
  * @param {number|null} chronologicalAge - Optional chronological age for comparison
  * @returns {Promise<Object>} Analysis results
  */
 export async function analyzeBloodTest(files, chronologicalAge = null) {
+  const useAI = getEnvBoolean('USE_AI_SERVICE', false) && isAIAvailable()
+
+  if (useAI) {
+    return analyzeWithAI(files, chronologicalAge)
+  } else {
+    return analyzeWithMock(files, chronologicalAge)
+  }
+}
+
+/**
+ * Analyzes files using AI service
+ * 
+ * @param {File|File[]} files - The uploaded file(s)
+ * @param {number|null} chronologicalAge - Optional chronological age
+ * @returns {Promise<Object>} Analysis results
+ */
+async function analyzeWithAI(files, chronologicalAge) {
+  const filesArray = Array.isArray(files) ? files : [files]
+  
+  try {
+    // Step 1: Extract text from files locally
+    // For PDFs: Extract text using PDF.js, then anonymize before sending to AI
+    // For images: Extract text using OCR (if available), otherwise Vision API will handle
+    // This ensures personal data is removed before AI processing
+    const extractedTexts = await Promise.all(
+      filesArray.map(async (file) => {
+        if (file.type === 'application/pdf') {
+          return await extractTextFromPDF(file)
+        } else if (file.type.startsWith('image/')) {
+          return await extractTextFromImage(file)
+        }
+        return ''
+      })
+    )
+
+    // Step 2: Anonymize content and extract biomarkers using AI
+    // If text was extracted: anonymize it first, then send anonymized text to AI
+    // If text extraction failed: Vision API will process file directly (less secure - should be avoided)
+    const allBiomarkers = []
+    for (let i = 0; i < filesArray.length; i++) {
+      try {
+        const text = extractedTexts[i]
+        const file = filesArray[i]
+        
+        console.log(`[Analysis] Processing file ${i + 1}:`, {
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          extractedTextLength: text ? text.length : 0,
+          extractedTextPreview: text ? text.substring(0, 200) : 'empty'
+        })
+        
+        // If we have extracted text (non-empty), anonymize it first
+        // Otherwise, pass empty string and let Vision API handle the file directly
+        let anonymizedContent = ''
+        if (text && text.trim().length > 0) {
+          console.log(`[Analysis] Text extracted, anonymizing...`)
+          const anonymizedData = anonymizeDocument(text, {
+            type: file.type,
+            size: file.size,
+          })
+          anonymizedContent = anonymizedData.anonymizedContent
+          console.log(`[Analysis] Anonymized content length: ${anonymizedContent.length}`)
+          console.log(`[Analysis] Anonymized preview:`, anonymizedContent.substring(0, 300))
+        } else {
+          console.warn(`[Analysis] No text extracted from PDF (length: ${text ? text.length : 0}), will use Vision API fallback`)
+        }
+        
+        // Extract biomarkers - Vision API will be used if content is empty
+        console.log(`[Analysis] Calling extractBiomarkers with:`, {
+          anonymizedContentLength: anonymizedContent.length,
+          fileType: file.type,
+          hasFile: !!file
+        })
+        
+        const biomarkers = await aiExtractBiomarkers(
+          anonymizedContent,
+          file.type,
+          file // Pass file for Vision API fallback
+        )
+        
+        console.log(`[Analysis] Extracted ${biomarkers.length} biomarkers from file ${i + 1}`)
+        if (biomarkers.length > 0) {
+          console.log(`[Analysis] First few biomarkers:`, biomarkers.slice(0, 3).map(b => ({
+            name: b.name,
+            value: b.value,
+            unit: b.unit
+          })))
+        }
+        
+        allBiomarkers.push(...biomarkers)
+      } catch (error) {
+        console.error(`[Analysis] AI biomarker extraction failed for file ${i + 1}:`, error)
+        console.error(`[Analysis] Error details:`, {
+          message: error.message,
+          stack: error.stack
+        })
+        // Continue with other files
+      }
+    }
+
+    // Merge biomarkers
+    const mergedBiomarkers = mergeBiomarkers(allBiomarkers)
+
+    // If no biomarkers extracted, throw error (no fallback to mock)
+    if (mergedBiomarkers.length === 0) {
+      throw new Error('No biomarkers could be extracted from the uploaded files. Please ensure the files contain readable blood test results.')
+    }
+
+    // Step 4: Generate health summary using AI
+    const healthSummary = await aiGenerateHealthSummary(mergedBiomarkers)
+
+    // Step 5: Calculate biological age using AI
+    const biologicalAge = await aiCalculateBiologicalAge(mergedBiomarkers)
+
+    // Step 6: Generate recommendations using AI
+    const recommendations = await aiGenerateRecommendations(mergedBiomarkers, biologicalAge)
+
+    return {
+      biomarkers: mergedBiomarkers,
+      healthSummary,
+      biologicalAge,
+      chronologicalAge: chronologicalAge || null,
+      recommendations,
+      analysisDate: new Date().toISOString(),
+      filesAnalyzed: filesArray.length,
+      analysisMethod: 'AI',
+    }
+  } catch (error) {
+    console.error('AI analysis failed:', error)
+    // Re-throw error - no fallback to mock service
+    // User should see the actual error
+    throw error
+  }
+}
+
+/**
+ * Analyzes files using mock service (fallback)
+ * 
+ * @param {File|File[]} files - The uploaded file(s)
+ * @param {number|null} chronologicalAge - Optional chronological age
+ * @returns {Promise<Object>} Analysis results
+ */
+async function analyzeWithMock(files, chronologicalAge) {
   // Normalize to array
   const filesArray = Array.isArray(files) ? files : [files]
 
@@ -66,6 +222,7 @@ export async function analyzeBloodTest(files, chronologicalAge = null) {
     recommendations,
     analysisDate: new Date().toISOString(),
     filesAnalyzed: filesArray.length,
+    analysisMethod: 'mock',
   }
 }
 

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import FileUpload from './FileUpload'
 
 describe('FileUpload', () => {
@@ -24,10 +24,11 @@ describe('FileUpload', () => {
     expect(handleFileSelect).toHaveBeenCalledWith(file, expect.arrayContaining([file]))
   })
 
-  it('shows error for file too large', () => {
+  it('shows error for file too large', async () => {
     const handleFileSelect = vi.fn()
-    // Create a file larger than 10MB
-    const largeFile = new File(['x'.repeat(11 * 1024 * 1024)], 'large.pdf', {
+    // Create a file larger than 10MB (use smaller size for faster test execution)
+    // Just over 10MB: 10MB + 1 byte
+    const largeFile = new File(['x'.repeat(10 * 1024 * 1024 + 1)], 'large.pdf', {
       type: 'application/pdf',
     })
 
@@ -37,8 +38,12 @@ describe('FileUpload', () => {
     fireEvent.change(input, { target: { files: [largeFile] } })
 
     expect(handleFileSelect).not.toHaveBeenCalled()
-    expect(screen.getByText(/File size must be less than 10MB/i)).toBeInTheDocument()
-  })
+    
+    // Wait for error message to appear (React state update)
+    await waitFor(() => {
+      expect(screen.getByText(/File size must be less than 10MB/i)).toBeInTheDocument()
+    }, { timeout: 10000 })
+  }, 15000) // Increase test timeout to 15 seconds for large file creation
 
   it('shows error for invalid file type', () => {
     const handleFileSelect = vi.fn()
